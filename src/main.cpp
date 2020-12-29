@@ -40,11 +40,13 @@ NTPClient timeClient(ntpUDP, servidorNTP, fusoHorario, 60000);
 void conf_PCA9698();
 void vLePca(void *pvParameters);
 void vLed(void *pvParameters);
-void vOled(void *pvParameters);
+void vhoraNTP(void *pvParameters);
+void vcertLePCA9698(void * pvParameters);
+void vTaskADC(void * pvParameters);
 
 unsigned long lastDebounceTime = 0; // última vez que o botão foi pressionado
 unsigned long debounceDelay = 1000; // O intervalo, igual ao delay do código anterior
-TaskHandle_t lePCA9698Handle, acendLEDHandle, OledHandle;
+TaskHandle_t lePCA9698Handle, acendLEDHandle, horaNTPHandle, certLePCA9698Handle,xtaskADCHandle;
 QueueHandle_t xfilaPCA;
 SemaphoreHandle_t mutex;
 
@@ -70,7 +72,7 @@ void setup()
   // Iniciar cliente de aquisição do tempo
   timeClient.begin();
 
-  xfilaPCA = xQueueCreate(40, sizeof(int));
+  xfilaPCA = xQueueCreate(10, sizeof(int));
   if (xfilaPCA == NULL)
   {
     Serial.println("Não foi possível criar a fila xfilaPCA");
@@ -79,8 +81,11 @@ void setup()
   mutex = xSemaphoreCreateMutex();
 
   xTaskCreatePinnedToCore(vLePca, "lePCA", configMINIMAL_STACK_SIZE + 1024, NULL, 4, &lePCA9698Handle, 1);
-  xTaskCreatePinnedToCore(vLed, "led", configMINIMAL_STACK_SIZE + 1024, NULL, 1, &acendLEDHandle, 1);
-  xTaskCreatePinnedToCore(vOled, "Oled", configMINIMAL_STACK_SIZE + 1024, NULL, 1, &OledHandle, 0);
+  xTaskCreatePinnedToCore(vLed, "led", configMINIMAL_STACK_SIZE + 1024, NULL, 1, &acendLEDHandle, 0);
+  xTaskCreatePinnedToCore(vhoraNTP, "horaNTP", configMINIMAL_STACK_SIZE + 1024, NULL, 1, &horaNTPHandle, 0);
+  xTaskCreatePinnedToCore(vcertLePCA9698,"cerTLePCA9698",configMINIMAL_STACK_SIZE+1024,NULL,1,&certLePCA9698Handle,0);
+  xTaskCreatePinnedToCore(vTaskADC, "TaskADC",configMINIMAL_STACK_SIZE+1024,NULL,1,&xtaskADCHandle,0);
+
 }
 
 void loop()
@@ -112,7 +117,7 @@ void vLePca(void *pvParameters)
           if (i >= 0 && i <= 7)
           {
             Serial.println("A porta a" + String(i) + " com nível: " + PortBit[i]);
-            Port_a[i] = gpio;
+            Port_a[i] = PortBit[i];
           }
           if (i >= 8 && i <= 15)
           {
@@ -160,7 +165,7 @@ void vLed(void *pvParameters)
     //vTaskDelay(50);
   }
 }
-void vOled(void *pvParameters)
+void vhoraNTP(void *pvParameters)
 {
   while (1)
   {
@@ -173,5 +178,25 @@ void vOled(void *pvParameters)
     vTaskDelay(pdMS_TO_TICKS(1000));
     //xSemaphoreGive(mutex);
     //vTaskDelay(pdMS_TO_TICKS(20));
+  }
+}
+void vcertLePCA9698(void * pvParameters){
+  while (1)
+  {
+    
+    vTaskDelay(25);
+  }
+}
+void vTaskADC(void * pvParameters){
+  while (1){
+    //xSemaphoreTake(xSemaphore,portMAX_DELAY);
+    xSemaphoreTake(mutex,portMAX_DELAY); 
+    float adcvalue=analogRead(34);
+    float x=adcvalue*1/1023;//*(3/1023);
+    Serial.println("O valor do ADC: "+String(x));
+    Serial.println("-------------------");
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    xSemaphoreGive(mutex);
+    vTaskDelay(100);
   }
 }
