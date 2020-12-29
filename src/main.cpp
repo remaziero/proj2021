@@ -108,12 +108,12 @@ void vLePca(void *pvParameters)
       int gpio = faboGPIO.digitalRead(i);
       int tempo = 10;
 
+//**************************************IMPORTANTE PARA TESTES*************************/
       if (gpio == HIGH)  //para imprimir apenas os níveis e modos das portas quando 1
-      {
+      {                  //SE COMENTAR lè e mostra a leitura de todos independente do nível
+//*************************************************************************************/
         if ((millis() - lastDebounceTime) > debounceDelay)
         {
-          //Serial.println("PCA9698 lendo porta "+String(i+1) +" no estado: " + String(gpio));
-          //PortBit[i] = gpio;
           if (i >= 0 && i <= 7)
           {
             int pa = i;
@@ -204,7 +204,6 @@ void vLePca(void *pvParameters)
           if (i >= 16 && i <= 19)
           {
             int pc = i - 16;
-            //Serial.println("A porta c" + String(pc + 1) + " com nível: " + PortBit[i]);
             Port_clow[pc] = gpio;
 
             //entrar com código de emissão MQTT aqui
@@ -237,7 +236,6 @@ void vLePca(void *pvParameters)
           if (i >= 20 && i <= 23)
           {
             int pc = i - 16;
-           // Serial.println("A porta c" + String(pc + 1) + " com modo: " + PortBit[i]);
             Port_chigh[pc] = gpio;
 
             //entrar com código de emissão MQTT aqui
@@ -269,7 +267,6 @@ void vLePca(void *pvParameters)
           if (i >= 24 && i <= 31)
           {
             int pd = i - 24;
-           // Serial.println("A porta d" + String(pd + 1) + " com modo: " + PortBit[i]);
             Port_d[pd] = gpio;
 
             //entrar com código de emissão MQTT aqui
@@ -313,7 +310,6 @@ void vLePca(void *pvParameters)
           if (i >= 32 && i <= 39)
           {
             int pe = i - 32;
-           // Serial.println("A porta e" + String(pe + 1) + " com modo: " + PortBit[i]);
             Port_e[pe] = gpio;
 
             //entrar com código de emissão MQTT aqui
