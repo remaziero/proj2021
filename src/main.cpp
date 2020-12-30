@@ -69,8 +69,12 @@ void setup()
   Serial.print("WiFi conectado. Endereço IP: ");
   Serial.println(WiFi.localIP());
 
+  
+   timeClient.forceUpdate();//Força o Update.
+
   // Iniciar cliente de aquisição do tempo
   timeClient.begin();
+  timeClient.forceUpdate();//Força o Update.
 
   xfilaPCA = xQueueCreate(10, sizeof(int));
   if (xfilaPCA == NULL)
