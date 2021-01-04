@@ -2,6 +2,7 @@
     "files.associations": {
         "*.html": "html",
         "algorithm": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "MQTT.C": "cpp"
     }
 }
